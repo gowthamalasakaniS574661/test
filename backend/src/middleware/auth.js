@@ -32,10 +32,10 @@ const authorize = (...roles) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
-    if (!roles.includes(req.user.role) && !roles.includes('both') && req.user.role !== 'both') {
-      return res.status(403).json({ error: 'Insufficient permissions' });
+    if (req.user.role === 'both' || roles.includes(req.user.role)) {
+      return next();
     }
-    next();
+    return res.status(403).json({ error: 'Insufficient permissions' });
   };
 };
 

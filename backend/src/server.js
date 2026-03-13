@@ -32,9 +32,11 @@ app.use('/api/v1', routes);
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = config.port;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} in ${config.env} mode`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = config.port;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT} in ${config.env} mode`);
+  });
+}
 
 module.exports = app;

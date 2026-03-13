@@ -1,12 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { createRideRequest, getRideRequests, getRideRequestById, getMyRequests, cancelRideRequest } = require('../controllers/rideRequestController');
-const { authenticate } = require('../middleware/auth');
+const {
+  createRideRequest, updateRideRequest, getRideRequests,
+  getRideRequestById, getMyRequests, cancelRideRequest,
+} = require('../controllers/rideRequestController');
+const { authenticate, authorize } = require('../middleware/auth');
+const { validate } = require('../middleware/validate');
+const {
+  createRideRequestValidation, updateRideRequestValidation,
+  rideRequestIdValidation, searchRideRequestsValidation,
+} = require('../validators/rideRequests');
 
-router.get('/', authenticate, getRideRequests);
+router.get('/', authenticate, validate(searchRideRequestsValidation), getRideRequests);
 router.get('/my', authenticate, getMyRequests);
-router.get('/:id', authenticate, getRideRequestById);
-router.post('/', authenticate, createRideRequest);
-router.post('/:id/cancel', authenticate, cancelRideRequest);
+router.get('/:id', authenticate, validate(rideRequestIdValidation), getRideRequestById);
+router.post('/', authenticate, authorize('passenger', 'both'), validate(createRideRequestValidation), createRideRequest);
+router.put('/:id', authenticate, authorize('passenger', 'both'), validate(updateRideRequestValidation), updateRideRequest);
+router.post('/:id/cancel', authenticate, validate(rideRequestIdValidation), cancelRideRequest);
 
 module.exports = router;
