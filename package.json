@@ -1,0 +1,16 @@
+{
+  "name": "rideshare-marketplace",
+  "version": "1.0.0",
+  "description": "Full-stack ride-sharing marketplace with bidding system",
+  "private": true,
+  "scripts": {
+    "backend:install": "cd backend && npm install",
+    "backend:dev": "cd backend && npm run dev",
+    "backend:start": "cd backend && npm start",
+    "backend:migrate": "cd backend && npm run migrate",
+    "backend:seed": "cd backend && npm run seed",
+    "mobile:install": "cd mobile && npm install",
+    "mobile:start": "cd mobile && npm start",
+    "install:all": "npm run backend:install && npm run mobile:install"
+  }
+}

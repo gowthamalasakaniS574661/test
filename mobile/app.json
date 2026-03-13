@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "RideShare Marketplace",
+    "slug": "rideshare-marketplace",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#4F46E5"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rideshare.marketplace"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#4F46E5"
+      },
+      "package": "com.rideshare.marketplace"
+    }
+  }
+}
