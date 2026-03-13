@@ -1,0 +1,5 @@
+-- Rollback Migration 005
+
+BEGIN;
+DROP TABLE IF EXISTS rides CASCADE;
+COMMIT;

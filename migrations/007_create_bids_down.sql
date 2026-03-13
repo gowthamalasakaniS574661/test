@@ -1,0 +1,5 @@
+-- Rollback Migration 007
+
+BEGIN;
+DROP TABLE IF EXISTS bids CASCADE;
+COMMIT;
