@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config');
 const { query } = require('../config/database');
 const { AppError } = require('../middleware/errorHandler');
+const { calculateTrustScore } = require('../services/trustScoreService');
 
 const generateToken = (userId) => {
   return jwt.sign({ userId }, config.jwt.secret, { expiresIn: config.jwt.expiresIn });
@@ -125,6 +126,15 @@ const getProfile = async (req, res, next) => {
         seatsAvailable: user.seats_available,
         isApproved: user.is_approved,
       };
+    }
+
+    try {
+      const trustBreakdown = await calculateTrustScore(req.user.id);
+      if (trustBreakdown) {
+        profile.trustBreakdown = trustBreakdown;
+      }
+    } catch {
+      // Non-critical — return profile without breakdown if calculation fails
     }
 
     res.json({ user: profile });

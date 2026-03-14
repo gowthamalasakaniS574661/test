@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import { TrustScoreCard } from '../../components/trust';
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
@@ -26,17 +27,17 @@ export default function ProfileScreen() {
       <Text style={styles.name}>{user.firstName} {user.lastName}</Text>
       <Text style={styles.role}>{user.role}</Text>
 
-      <View style={styles.statsRow}>
-        <View style={styles.stat}>
-          <Text style={styles.statValue}>{user.trustScore || '5.00'}</Text>
-          <Text style={styles.statLabel}>Trust Score</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.stat}>
-          <Text style={styles.statValue}>{user.totalRatings || 0}</Text>
-          <Text style={styles.statLabel}>Ratings</Text>
-        </View>
-      </View>
+      <TouchableOpacity
+        style={styles.trustScoreContainer}
+        onPress={() => navigation.navigate('TrustScore')}
+        activeOpacity={0.7}
+      >
+        <TrustScoreCard
+          score={user.trustScore || user.trustBreakdown?.overallScore || 5.00}
+          totalRatings={user.totalRatings || 0}
+        />
+        <Text style={styles.viewBreakdown}>Tap to view breakdown →</Text>
+      </TouchableOpacity>
 
       <View style={styles.section}>
         <View style={styles.infoRow}>
@@ -88,11 +89,8 @@ const styles = StyleSheet.create({
   avatarText: { color: '#fff', fontSize: 28, fontWeight: '700' },
   name: { fontSize: 24, fontWeight: '700', color: '#111827' },
   role: { fontSize: 14, color: '#6B7280', textTransform: 'capitalize', marginBottom: 20 },
-  statsRow: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 16, padding: 20, width: '100%', justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 2, marginBottom: 16 },
-  stat: { alignItems: 'center', flex: 1 },
-  statValue: { fontSize: 24, fontWeight: '800', color: '#4F46E5' },
-  statLabel: { fontSize: 13, color: '#6B7280', marginTop: 4 },
-  statDivider: { width: 1, height: 40, backgroundColor: '#E5E7EB' },
+  trustScoreContainer: { width: '100%', marginBottom: 16 },
+  viewBreakdown: { fontSize: 13, color: '#4F46E5', fontWeight: '600', textAlign: 'center', marginTop: 8 },
   section: { backgroundColor: '#fff', borderRadius: 16, padding: 16, width: '100%', marginBottom: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 2 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 8 },
   infoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },

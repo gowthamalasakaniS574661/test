@@ -5,6 +5,7 @@ import { bidsAPI } from '../../api/bids';
 import { bookingsAPI } from '../../api/bookings';
 import { useAuth } from '../../contexts/AuthContext';
 import { RouteMap } from '../../components/map';
+import { TrustScoreCard } from '../../components/trust';
 import useRouteDirections from '../../hooks/useRouteDirections';
 import { formatDistance, formatDuration } from '../../utils/location';
 
@@ -186,7 +187,9 @@ function RideDetailContent({ ride, isOwnRide, originCoord, destCoord, bidAmount,
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Driver</Text>
           <Text style={styles.driverName}>{ride.driver.firstName} {ride.driver.lastName}</Text>
-          <Text style={styles.trustScore}>Trust Score: {ride.driver.trustScore}/5 ({ride.driver.totalRatings} ratings)</Text>
+          <View style={styles.driverTrustRow}>
+            <TrustScoreCard score={ride.driver.trustScore} totalRatings={ride.driver.totalRatings} compact />
+          </View>
           {ride.vehicle && (
             <Text style={styles.vehicle}>{ride.vehicle.color} {ride.vehicle.year} {ride.vehicle.make} {ride.vehicle.model}</Text>
           )}
@@ -283,7 +286,7 @@ const styles = StyleSheet.create({
   detailValue: { fontSize: 14, fontWeight: '600', color: '#111827' },
   description: { fontSize: 14, color: '#374151', marginTop: 8, lineHeight: 20 },
   driverName: { fontSize: 18, fontWeight: '600', color: '#111827' },
-  trustScore: { fontSize: 14, color: '#6B7280', marginTop: 4 },
+  driverTrustRow: { marginTop: 6, marginBottom: 4 },
   vehicle: { fontSize: 14, color: '#374151', marginTop: 4 },
   bookButton: { backgroundColor: '#059669', borderRadius: 12, paddingVertical: 16, alignItems: 'center' },
   bookButtonText: { color: '#fff', fontSize: 16, fontWeight: '700' },

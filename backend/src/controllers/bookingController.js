@@ -1,5 +1,6 @@
 const { query, getClient } = require('../config/database');
 const { AppError } = require('../middleware/errorHandler');
+const { recalculateAndSave } = require('../services/trustScoreService');
 
 const createBooking = async (req, res, next) => {
   const client = await getClient();
@@ -178,6 +179,9 @@ const cancelBooking = async (req, res, next) => {
     }
 
     await client.query('COMMIT');
+
+    setImmediate(() => recalculateAndSave(booking.rows[0].passenger_id).catch(() => {}));
+
     res.json({ message: 'Booking cancelled', paymentRefunded: refunded });
   } catch (err) {
     await client.query('ROLLBACK');
@@ -230,6 +234,14 @@ const completeBooking = async (req, res, next) => {
     }
 
     await client.query('COMMIT');
+
+    const driverId = booking.rows[0].driver_id;
+    const passengerId = booking.rows[0].passenger_id;
+    setImmediate(() => {
+      recalculateAndSave(driverId).catch(() => {});
+      recalculateAndSave(passengerId).catch(() => {});
+    });
+
     res.json({ message: 'Booking completed', paymentCaptured });
   } catch (err) {
     await client.query('ROLLBACK');

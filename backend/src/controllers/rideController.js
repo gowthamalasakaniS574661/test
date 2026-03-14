@@ -1,5 +1,6 @@
 const { query } = require('../config/database');
 const { AppError } = require('../middleware/errorHandler');
+const { recalculateAndSave } = require('../services/trustScoreService');
 
 const createRide = async (req, res, next) => {
   try {
@@ -212,6 +213,8 @@ const cancelRide = async (req, res, next) => {
     await query(`UPDATE rides SET status = 'cancelled', updated_at = NOW() WHERE id = $1`, [req.params.id]);
     await query(`UPDATE bookings SET status = 'cancelled', updated_at = NOW() WHERE ride_id = $1 AND status = 'confirmed'`, [req.params.id]);
     await query(`UPDATE bids SET status = 'rejected', updated_at = NOW() WHERE ride_id = $1 AND status = 'pending'`, [req.params.id]);
+
+    setImmediate(() => recalculateAndSave(req.user.id).catch(() => {}));
 
     res.json({ message: 'Ride cancelled' });
   } catch (err) {

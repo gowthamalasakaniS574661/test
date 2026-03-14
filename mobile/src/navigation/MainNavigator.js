@@ -11,6 +11,7 @@ import PostRideScreen from '../screens/driver/PostRideScreen';
 import MyRidesScreen from '../screens/driver/MyRidesScreen';
 import ProfileScreen from '../screens/shared/ProfileScreen';
 import LiveTrackingScreen from '../screens/shared/LiveTrackingScreen';
+import TrustScoreScreen from '../screens/shared/TrustScoreScreen';
 import PaymentScreen from '../screens/payment/PaymentScreen';
 import PaymentHistoryScreen from '../screens/payment/PaymentHistoryScreen';
 import StripeConnectScreen from '../screens/payment/StripeConnectScreen';
@@ -67,6 +68,15 @@ function PaymentsStack() {
   );
 }
 
+function ProfileStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="ProfileMain" component={ProfileScreen} options={{ title: 'Profile' }} />
+      <Stack.Screen name="TrustScore" component={TrustScoreScreen} options={{ title: 'Trust Score' }} />
+    </Stack.Navigator>
+  );
+}
+
 export default function MainNavigator() {
   const { user } = useAuth();
   const isDriver = user?.role === 'driver' || user?.role === 'both';
@@ -89,7 +99,7 @@ export default function MainNavigator() {
       <Tab.Screen name="Bookings" component={BookingsStack} />
       {isDriver && <Tab.Screen name="My Rides" component={DriverStack} />}
       <Tab.Screen name="Payments" component={PaymentsStack} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Profile" component={ProfileStack} />
     </Tab.Navigator>
   );
 }

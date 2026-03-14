@@ -1,5 +1,6 @@
 const { query, getClient } = require('../config/database');
 const { AppError } = require('../middleware/errorHandler');
+const { recalculateAndSave } = require('../services/trustScoreService');
 
 const createRating = async (req, res, next) => {
   const client = await getClient();
@@ -34,17 +35,9 @@ const createRating = async (req, res, next) => {
       [bookingId, req.user.id, revieweeId, score, comment]
     );
 
-    const avgResult = await client.query(
-      'SELECT AVG(score)::DECIMAL(3,2) as avg_score, COUNT(*) as total FROM ratings WHERE reviewee_id = $1',
-      [revieweeId]
-    );
-
-    await client.query(
-      'UPDATE users SET trust_score = $1, total_ratings = $2, updated_at = NOW() WHERE id = $3',
-      [avgResult.rows[0].avg_score, parseInt(avgResult.rows[0].total, 10), revieweeId]
-    );
-
     await client.query('COMMIT');
+
+    setImmediate(() => recalculateAndSave(revieweeId).catch(() => {}));
 
     res.status(201).json({
       message: 'Rating submitted',

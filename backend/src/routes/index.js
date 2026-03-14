@@ -10,6 +10,7 @@ router.use('/bids', require('./bids'));
 router.use('/bookings', require('./bookings'));
 router.use('/ratings', require('./ratings'));
 router.use('/payments', require('./payments'));
+router.use('/trust-score', require('./trustScore'));
 router.get('/directions', authenticate, getDirections);
 
 module.exports = router;
