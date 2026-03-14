@@ -10,12 +10,13 @@ import MyBookingsScreen from '../screens/passenger/MyBookingsScreen';
 import PostRideScreen from '../screens/driver/PostRideScreen';
 import MyRidesScreen from '../screens/driver/MyRidesScreen';
 import ProfileScreen from '../screens/shared/ProfileScreen';
+import LiveTrackingScreen from '../screens/shared/LiveTrackingScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function TabIcon({ label, focused }) {
-  const icons = { Search: '🔍', Bookings: '📋', 'My Rides': '🚗', Profile: '👤' };
+  const icons = { Search: '🔍', Bookings: '📋', 'My Rides': '🚗', Map: '🗺️', Profile: '👤' };
   return <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>{icons[label] || '•'}</Text>;
 }
 
@@ -24,6 +25,7 @@ function SearchStack() {
     <Stack.Navigator>
       <Stack.Screen name="SearchRides" component={SearchRidesScreen} options={{ title: 'Find Rides' }} />
       <Stack.Screen name="RideDetail" component={RideDetailScreen} options={{ title: 'Ride Details' }} />
+      <Stack.Screen name="LiveTracking" component={LiveTrackingScreen} options={{ title: 'Live Tracking', headerTransparent: true, headerTintColor: '#111827' }} />
     </Stack.Navigator>
   );
 }
@@ -33,6 +35,7 @@ function BookingsStack() {
     <Stack.Navigator>
       <Stack.Screen name="MyBookingsList" component={MyBookingsScreen} options={{ title: 'My Bookings' }} />
       <Stack.Screen name="RideDetail" component={RideDetailScreen} options={{ title: 'Ride Details' }} />
+      <Stack.Screen name="LiveTracking" component={LiveTrackingScreen} options={{ title: 'Live Tracking', headerTransparent: true, headerTintColor: '#111827' }} />
     </Stack.Navigator>
   );
 }
@@ -43,6 +46,7 @@ function DriverStack() {
       <Stack.Screen name="MyRidesList" component={MyRidesScreen} options={{ title: 'My Rides' }} />
       <Stack.Screen name="PostRide" component={PostRideScreen} options={{ title: 'Post a Ride' }} />
       <Stack.Screen name="RideDetail" component={RideDetailScreen} options={{ title: 'Ride Details' }} />
+      <Stack.Screen name="LiveTracking" component={LiveTrackingScreen} options={{ title: 'Live Tracking', headerTransparent: true, headerTintColor: '#111827' }} />
     </Stack.Navigator>
   );
 }

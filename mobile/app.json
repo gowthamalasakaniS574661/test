@@ -11,13 +11,38 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.rideshare.marketplace"
+      "bundleIdentifier": "com.rideshare.marketplace",
+      "config": {
+        "googleMapsApiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+      },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "We need your location to show your position on the map and track rides.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "We need your location in the background for live ride tracking."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#4F46E5"
       },
-      "package": "com.rideshare.marketplace"
-    }
+      "package": "com.rideshare.marketplace",
+      "config": {
+        "googleMaps": {
+          "apiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+        }
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow RideShare to use your location for live ride tracking."
+        }
+      ]
+    ]
   }
 }

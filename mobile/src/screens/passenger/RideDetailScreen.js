@@ -4,6 +4,9 @@ import { ridesAPI } from '../../api/rides';
 import { bidsAPI } from '../../api/bids';
 import { bookingsAPI } from '../../api/bookings';
 import { useAuth } from '../../contexts/AuthContext';
+import { RouteMap } from '../../components/map';
+import useRouteDirections from '../../hooks/useRouteDirections';
+import { formatDistance, formatDuration } from '../../utils/location';
 
 export default function RideDetailScreen({ route, navigation }) {
   const { rideId } = route.params;
@@ -69,6 +72,35 @@ export default function RideDetailScreen({ route, navigation }) {
 
   const isOwnRide = ride.driverId === user?.id;
 
+  const originCoord = ride.origin?.lat || ride.origin?.latitude
+    ? { latitude: ride.origin.lat || ride.origin.latitude, longitude: ride.origin.lng || ride.origin.longitude, address: ride.origin.address }
+    : null;
+
+  const destCoord = ride.destination?.lat || ride.destination?.latitude
+    ? { latitude: ride.destination.lat || ride.destination.latitude, longitude: ride.destination.lng || ride.destination.longitude, address: ride.destination.address }
+    : null;
+
+  return (
+    <RideDetailContent
+      ride={ride}
+      isOwnRide={isOwnRide}
+      originCoord={originCoord}
+      destCoord={destCoord}
+      bidAmount={bidAmount}
+      setBidAmount={setBidAmount}
+      bidMessage={bidMessage}
+      setBidMessage={setBidMessage}
+      submitting={submitting}
+      handleBookDirectly={handleBookDirectly}
+      handlePlaceBid={handlePlaceBid}
+      navigation={navigation}
+    />
+  );
+}
+
+function RideDetailContent({ ride, isOwnRide, originCoord, destCoord, bidAmount, setBidAmount, bidMessage, setBidMessage, submitting, handleBookDirectly, handlePlaceBid, navigation }) {
+  const { routeCoordinates, distance, duration } = useRouteDirections(originCoord, destCoord);
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
@@ -77,6 +109,35 @@ export default function RideDetailScreen({ route, navigation }) {
           <Text style={styles.statusText}>{ride.status}</Text>
         </View>
       </View>
+
+      {originCoord && destCoord && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Route Map</Text>
+          <RouteMap
+            origin={originCoord}
+            destination={destCoord}
+            routeCoordinates={routeCoordinates}
+            style={styles.mapView}
+            interactive={false}
+          />
+          {(distance || duration) && (
+            <View style={styles.routeStats}>
+              {distance != null && (
+                <View style={styles.routeStat}>
+                  <Text style={styles.routeStatValue}>{formatDistance(distance)}</Text>
+                  <Text style={styles.routeStatLabel}>Distance</Text>
+                </View>
+              )}
+              {duration != null && (
+                <View style={styles.routeStat}>
+                  <Text style={styles.routeStatValue}>{formatDuration(duration)}</Text>
+                  <Text style={styles.routeStatLabel}>Est. Duration</Text>
+                </View>
+              )}
+            </View>
+          )}
+        </View>
+      )}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Route</Text>
@@ -174,6 +235,16 @@ export default function RideDetailScreen({ route, navigation }) {
           ))}
         </View>
       )}
+
+      {(ride.status === 'in_progress' || ride.status === 'confirmed') && ride.bookingId && (
+        <TouchableOpacity
+          style={styles.trackButton}
+          onPress={() => navigation.navigate('LiveTracking', { bookingId: ride.bookingId })}
+        >
+          <Text style={styles.trackButtonIcon}>📍</Text>
+          <Text style={styles.trackButtonText}>Track Ride Live</Text>
+        </TouchableOpacity>
+      )}
     </ScrollView>
   );
 }
@@ -223,4 +294,12 @@ const styles = StyleSheet.create({
   bid_pending: { color: '#D97706' },
   bid_accepted: { color: '#059669' },
   bid_rejected: { color: '#DC2626' },
+  mapView: { height: 200, borderRadius: 12 },
+  routeStats: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#F3F4F6' },
+  routeStat: { alignItems: 'center' },
+  routeStatValue: { fontSize: 18, fontWeight: '700', color: '#111827' },
+  routeStatLabel: { fontSize: 12, color: '#6B7280', marginTop: 2 },
+  trackButton: { flexDirection: 'row', backgroundColor: '#4F46E5', borderRadius: 14, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 12, shadowColor: '#4F46E5', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 },
+  trackButtonIcon: { fontSize: 18 },
+  trackButtonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });

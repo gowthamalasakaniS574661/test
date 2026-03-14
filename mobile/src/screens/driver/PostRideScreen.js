@@ -1,16 +1,34 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, ActivityIndicator, Switch } from 'react-native';
 import { ridesAPI } from '../../api/rides';
+import { LocationPicker } from '../../components/map';
 
 export default function PostRideScreen({ navigation }) {
   const [form, setForm] = useState({
     originAddress: '', destinationAddress: '', departureTime: '',
     availableSeats: '3', basePrice: '', pricePerSeat: '',
     allowBidding: true, minBidPrice: '', description: '',
+    originLocation: null, destinationLocation: null,
   });
   const [loading, setLoading] = useState(false);
 
   const updateField = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
+
+  const handleOriginSelect = (location) => {
+    setForm((prev) => ({
+      ...prev,
+      originLocation: location,
+      originAddress: location.address || prev.originAddress,
+    }));
+  };
+
+  const handleDestinationSelect = (location) => {
+    setForm((prev) => ({
+      ...prev,
+      destinationLocation: location,
+      destinationAddress: location.address || prev.destinationAddress,
+    }));
+  };
 
   const handlePost = async () => {
     if (!form.originAddress || !form.destinationAddress || !form.departureTime || !form.basePrice || !form.pricePerSeat) {
@@ -20,7 +38,7 @@ export default function PostRideScreen({ navigation }) {
 
     setLoading(true);
     try {
-      await ridesAPI.createRide({
+      const rideData = {
         originAddress: form.originAddress,
         destinationAddress: form.destinationAddress,
         departureTime: new Date(form.departureTime).toISOString(),
@@ -30,7 +48,18 @@ export default function PostRideScreen({ navigation }) {
         allowBidding: form.allowBidding,
         minBidPrice: form.minBidPrice ? parseFloat(form.minBidPrice) : 0,
         description: form.description,
-      });
+      };
+
+      if (form.originLocation) {
+        rideData.originLat = form.originLocation.latitude;
+        rideData.originLng = form.originLocation.longitude;
+      }
+      if (form.destinationLocation) {
+        rideData.destinationLat = form.destinationLocation.latitude;
+        rideData.destinationLng = form.destinationLocation.longitude;
+      }
+
+      await ridesAPI.createRide(rideData);
       Alert.alert('Success', 'Ride posted!', [{ text: 'OK', onPress: () => navigation.goBack() }]);
     } catch (err) {
       Alert.alert('Error', err.response?.data?.error || 'Failed to post ride');
@@ -43,11 +72,19 @@ export default function PostRideScreen({ navigation }) {
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <Text style={styles.title}>Post a Ride</Text>
 
-      <Text style={styles.label}>Origin *</Text>
-      <TextInput style={styles.input} placeholder="Pickup address" placeholderTextColor="#9CA3AF" value={form.originAddress} onChangeText={(v) => updateField('originAddress', v)} />
+      <LocationPicker
+        label="Pickup Location"
+        value={form.originLocation}
+        onLocationSelect={handleOriginSelect}
+        markerColor="#4F46E5"
+      />
 
-      <Text style={styles.label}>Destination *</Text>
-      <TextInput style={styles.input} placeholder="Dropoff address" placeholderTextColor="#9CA3AF" value={form.destinationAddress} onChangeText={(v) => updateField('destinationAddress', v)} />
+      <LocationPicker
+        label="Destination"
+        value={form.destinationLocation}
+        onLocationSelect={handleDestinationSelect}
+        markerColor="#EF4444"
+      />
 
       <Text style={styles.label}>Departure Time * (YYYY-MM-DD HH:MM)</Text>
       <TextInput style={styles.input} placeholder="2026-03-15 09:00" placeholderTextColor="#9CA3AF" value={form.departureTime} onChangeText={(v) => updateField('departureTime', v)} />

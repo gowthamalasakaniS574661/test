@@ -73,7 +73,9 @@ const getMyBookings = async (req, res, next) => {
 const getBookingById = async (req, res, next) => {
   try {
     const result = await query(
-      `SELECT b.*, r.origin_address, r.destination_address, r.departure_time, r.driver_id,
+      `SELECT b.*, r.origin_address, r.origin_lat, r.origin_lng,
+              r.destination_address, r.destination_lat, r.destination_lng,
+              r.departure_time, r.driver_id,
               u.first_name as driver_first_name, u.last_name as driver_last_name,
               p.first_name as passenger_first_name, p.last_name as passenger_last_name
        FROM bookings b
@@ -99,6 +101,19 @@ const getBookingById = async (req, res, next) => {
         departureTime: b.departure_time,
         driverName: `${b.driver_first_name} ${b.driver_last_name}`,
         passengerName: `${b.passenger_first_name} ${b.passenger_last_name}`,
+        ride: {
+          driverId: b.driver_id,
+          origin: {
+            address: b.origin_address,
+            lat: b.origin_lat ? parseFloat(b.origin_lat) : null,
+            lng: b.origin_lng ? parseFloat(b.origin_lng) : null,
+          },
+          destination: {
+            address: b.destination_address,
+            lat: b.destination_lat ? parseFloat(b.destination_lat) : null,
+            lng: b.destination_lng ? parseFloat(b.destination_lng) : null,
+          },
+        },
       },
     });
   } catch (err) {

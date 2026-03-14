@@ -51,6 +51,14 @@ export default function MyBookingsScreen({ navigation }) {
       <Text style={styles.routeText}>{item.rideOrigin} → {item.rideDestination}</Text>
       <Text style={styles.meta}>Driver: {item.driverName} | Seats: {item.seatsBooked}</Text>
       <Text style={styles.date}>{new Date(item.departureTime).toLocaleString()}</Text>
+      {(item.status === 'in_progress' || item.status === 'confirmed') && (
+        <TouchableOpacity
+          style={styles.trackBtn}
+          onPress={() => navigation.navigate('LiveTracking', { bookingId: item.id })}
+        >
+          <Text style={styles.trackBtnText}>📍 Track Ride</Text>
+        </TouchableOpacity>
+      )}
       {item.status === 'confirmed' && (
         <TouchableOpacity style={styles.cancelBtn} onPress={() => handleCancel(item.id)}>
           <Text style={styles.cancelText}>Cancel Booking</Text>
@@ -87,7 +95,9 @@ const styles = StyleSheet.create({
   routeText: { fontSize: 15, fontWeight: '500', color: '#374151', marginBottom: 4 },
   meta: { fontSize: 13, color: '#6B7280' },
   date: { fontSize: 13, color: '#9CA3AF', marginTop: 4 },
-  cancelBtn: { marginTop: 10, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: '#EF4444', alignItems: 'center' },
+  trackBtn: { marginTop: 10, paddingVertical: 12, borderRadius: 10, backgroundColor: '#4F46E5', alignItems: 'center' },
+  trackBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  cancelBtn: { marginTop: 8, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: '#EF4444', alignItems: 'center' },
   cancelText: { color: '#EF4444', fontWeight: '600', fontSize: 14 },
   empty: { textAlign: 'center', color: '#9CA3AF', marginTop: 40, fontSize: 16 },
 });
