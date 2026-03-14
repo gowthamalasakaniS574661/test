@@ -4,6 +4,7 @@ const { createTables } = require('./001_create_tables');
 const { addStripeFields } = require('./002_add_stripe_fields');
 const { addTrustScoreFields } = require('./003_add_trust_score_fields');
 const { addSafetyTables } = require('./004_add_safety_tables');
+const { addRemainingTables } = require('./005_add_remaining_tables');
 
 async function migrate() {
   const client = await pool.connect();
@@ -17,6 +18,8 @@ async function migrate() {
     console.log('003_add_trust_score_fields: done');
     await client.query(addSafetyTables);
     console.log('004_add_safety_tables: done');
+    await client.query(addRemainingTables);
+    console.log('005_add_remaining_tables: done');
     console.log('Migrations completed successfully.');
   } catch (err) {
     console.error('Migration failed:', err.message);

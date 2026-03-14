@@ -12,6 +12,11 @@ router.use('/ratings', require('./ratings'));
 router.use('/payments', require('./payments'));
 router.use('/trust-score', require('./trustScore'));
 router.use('/safety', require('./safety'));
+router.use('/admin', require('./admin'));
+router.use('/ads', require('./ads'));
+router.use('/notifications', require('./notifications'));
+router.use('/reports', require('./reports'));
+router.use('/matching', require('./matching'));
 router.get('/directions', authenticate, getDirections);
 
 module.exports = router;

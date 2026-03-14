@@ -12,9 +12,12 @@ const authenticate = async (req, res, next) => {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, config.jwt.secret);
 
-    const result = await query('SELECT id, email, first_name, last_name, role, trust_score FROM users WHERE id = $1', [decoded.userId]);
+    const result = await query('SELECT id, email, first_name, last_name, role, trust_score, is_suspended FROM users WHERE id = $1', [decoded.userId]);
     if (result.rows.length === 0) {
       return res.status(401).json({ error: 'User not found' });
+    }
+    if (result.rows[0].is_suspended) {
+      return res.status(403).json({ error: 'Account suspended' });
     }
 
     req.user = result.rows[0];
@@ -32,6 +35,7 @@ const authorize = (...roles) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
+    if (req.user.role === 'admin') return next();
     if (!roles.includes(req.user.role) && !roles.includes('both') && req.user.role !== 'both') {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
