@@ -47,10 +47,12 @@ const getMyBookings = async (req, res, next) => {
   try {
     const result = await query(
       `SELECT b.*, r.origin_address, r.destination_address, r.departure_time,
-              u.first_name as driver_first_name, u.last_name as driver_last_name
+              u.first_name as driver_first_name, u.last_name as driver_last_name,
+              p.status as payment_status, p.id as payment_id
        FROM bookings b
        JOIN rides r ON b.ride_id = r.id
        JOIN users u ON r.driver_id = u.id
+       LEFT JOIN payments p ON p.booking_id = b.id AND p.status NOT IN ('failed', 'refunded')
        WHERE b.passenger_id = $1
        ORDER BY r.departure_time DESC`,
       [req.user.id]
@@ -63,6 +65,8 @@ const getMyBookings = async (req, res, next) => {
         rideDestination: b.destination_address,
         departureTime: b.departure_time,
         driverName: `${b.driver_first_name} ${b.driver_last_name}`,
+        paymentStatus: b.payment_status || null,
+        paymentId: b.payment_id || null,
       })),
     });
   } catch (err) {
@@ -143,8 +147,38 @@ const cancelBooking = async (req, res, next) => {
       [booking.rows[0].seats_booked, booking.rows[0].ride_id]
     );
 
+    const escrowPayment = await client.query(
+      `SELECT * FROM payments WHERE booking_id = $1 AND status IN ('escrow', 'pending') LIMIT 1`,
+      [req.params.id]
+    );
+
+    let refunded = false;
+    if (escrowPayment.rows.length > 0) {
+      try {
+        const stripe = require('../config/stripe');
+        const p = escrowPayment.rows[0];
+
+        if (p.stripe_payment_intent_id) {
+          const paymentIntent = await stripe.paymentIntents.retrieve(p.stripe_payment_intent_id);
+          if (paymentIntent.status === 'requires_capture') {
+            await stripe.paymentIntents.cancel(p.stripe_payment_intent_id);
+          } else if (paymentIntent.status === 'succeeded') {
+            await stripe.refunds.create({ payment_intent: p.stripe_payment_intent_id });
+          }
+        }
+
+        await client.query(
+          `UPDATE payments SET status = 'refunded', refunded_at = NOW(), updated_at = NOW() WHERE id = $1`,
+          [p.id]
+        );
+        refunded = true;
+      } catch (stripeErr) {
+        console.error('Stripe refund failed during booking cancellation:', stripeErr.message);
+      }
+    }
+
     await client.query('COMMIT');
-    res.json({ message: 'Booking cancelled' });
+    res.json({ message: 'Booking cancelled', paymentRefunded: refunded });
   } catch (err) {
     await client.query('ROLLBACK');
     next(err);
@@ -154,18 +188,54 @@ const cancelBooking = async (req, res, next) => {
 };
 
 const completeBooking = async (req, res, next) => {
+  const client = await getClient();
   try {
-    const booking = await query('SELECT b.*, r.driver_id FROM bookings b JOIN rides r ON b.ride_id = r.id WHERE b.id = $1', [req.params.id]);
+    await client.query('BEGIN');
+
+    const booking = await client.query(
+      'SELECT b.*, r.driver_id FROM bookings b JOIN rides r ON b.ride_id = r.id WHERE b.id = $1 FOR UPDATE',
+      [req.params.id]
+    );
     if (booking.rows.length === 0) throw new AppError('Booking not found', 404);
     if (booking.rows[0].driver_id !== req.user.id) throw new AppError('Only the driver can complete a booking', 403);
     if (booking.rows[0].status !== 'confirmed' && booking.rows[0].status !== 'in_progress') {
       throw new AppError('Booking cannot be completed', 400);
     }
 
-    await query(`UPDATE bookings SET status = 'completed', updated_at = NOW() WHERE id = $1`, [req.params.id]);
-    res.json({ message: 'Booking completed' });
+    await client.query(
+      `UPDATE bookings SET status = 'completed', updated_at = NOW() WHERE id = $1`,
+      [req.params.id]
+    );
+
+    const escrowPayment = await client.query(
+      `SELECT * FROM payments WHERE booking_id = $1 AND status = 'escrow' LIMIT 1`,
+      [req.params.id]
+    );
+
+    let paymentCaptured = false;
+    if (escrowPayment.rows.length > 0) {
+      try {
+        const stripe = require('../config/stripe');
+        const p = escrowPayment.rows[0];
+
+        await stripe.paymentIntents.capture(p.stripe_payment_intent_id);
+        await client.query(
+          `UPDATE payments SET status = 'completed', captured_at = NOW(), updated_at = NOW() WHERE id = $1`,
+          [p.id]
+        );
+        paymentCaptured = true;
+      } catch (stripeErr) {
+        console.error('Stripe capture failed during booking completion:', stripeErr.message);
+      }
+    }
+
+    await client.query('COMMIT');
+    res.json({ message: 'Booking completed', paymentCaptured });
   } catch (err) {
+    await client.query('ROLLBACK');
     next(err);
+  } finally {
+    client.release();
   }
 };
 

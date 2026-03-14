@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigation } from '@react-navigation/native';
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
+  const navigation = useNavigation();
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to log out?', [
@@ -63,6 +65,15 @@ export default function ProfileScreen() {
         </View>
       )}
 
+      {(user.role === 'driver' || user.role === 'both') && (
+        <TouchableOpacity
+          style={styles.connectButton}
+          onPress={() => navigation.navigate('Payments', { screen: 'StripeConnect' })}
+        >
+          <Text style={styles.connectButtonText}>💳 Setup Payouts (Stripe)</Text>
+        </TouchableOpacity>
+      )}
+
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Log Out</Text>
       </TouchableOpacity>
@@ -89,6 +100,8 @@ const styles = StyleSheet.create({
   infoValue: { fontSize: 14, fontWeight: '500', color: '#111827' },
   vehicleText: { fontSize: 16, fontWeight: '500', color: '#374151' },
   vehiclePlate: { fontSize: 14, color: '#6B7280', marginTop: 4 },
+  connectButton: { width: '100%', marginTop: 12, backgroundColor: '#4F46E5', borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
+  connectButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   logoutButton: { width: '100%', marginTop: 12, borderWidth: 2, borderColor: '#EF4444', borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
   logoutText: { color: '#EF4444', fontSize: 16, fontWeight: '600' },
 });

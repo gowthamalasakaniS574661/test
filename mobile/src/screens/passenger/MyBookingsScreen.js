@@ -51,6 +51,19 @@ export default function MyBookingsScreen({ navigation }) {
       <Text style={styles.routeText}>{item.rideOrigin} → {item.rideDestination}</Text>
       <Text style={styles.meta}>Driver: {item.driverName} | Seats: {item.seatsBooked}</Text>
       <Text style={styles.date}>{new Date(item.departureTime).toLocaleString()}</Text>
+      {item.status === 'confirmed' && !item.paymentStatus && (
+        <TouchableOpacity
+          style={styles.payBtn}
+          onPress={() => navigation.navigate('Payment', { bookingId: item.id })}
+        >
+          <Text style={styles.payBtnText}>💳 Pay Now</Text>
+        </TouchableOpacity>
+      )}
+      {item.status === 'confirmed' && item.paymentStatus === 'escrow' && (
+        <View style={styles.escrowBadge}>
+          <Text style={styles.escrowBadgeText}>🔒 Payment in Escrow</Text>
+        </View>
+      )}
       {(item.status === 'in_progress' || item.status === 'confirmed') && (
         <TouchableOpacity
           style={styles.trackBtn}
@@ -95,7 +108,11 @@ const styles = StyleSheet.create({
   routeText: { fontSize: 15, fontWeight: '500', color: '#374151', marginBottom: 4 },
   meta: { fontSize: 13, color: '#6B7280' },
   date: { fontSize: 13, color: '#9CA3AF', marginTop: 4 },
-  trackBtn: { marginTop: 10, paddingVertical: 12, borderRadius: 10, backgroundColor: '#4F46E5', alignItems: 'center' },
+  payBtn: { marginTop: 10, paddingVertical: 14, borderRadius: 10, backgroundColor: '#059669', alignItems: 'center' },
+  payBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  escrowBadge: { marginTop: 10, paddingVertical: 10, borderRadius: 10, backgroundColor: '#DBEAFE', alignItems: 'center' },
+  escrowBadgeText: { color: '#2563EB', fontWeight: '600', fontSize: 13 },
+  trackBtn: { marginTop: 8, paddingVertical: 12, borderRadius: 10, backgroundColor: '#4F46E5', alignItems: 'center' },
   trackBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
   cancelBtn: { marginTop: 8, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: '#EF4444', alignItems: 'center' },
   cancelText: { color: '#EF4444', fontWeight: '600', fontSize: 14 },

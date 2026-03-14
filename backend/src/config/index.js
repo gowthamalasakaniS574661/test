@@ -14,8 +14,10 @@ module.exports = {
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || '',
   },
-  payment: {
-    apiKey: process.env.PAYMENT_API_KEY || '',
-    secret: process.env.PAYMENT_SECRET || '',
+  stripe: {
+    secretKey: process.env.STRIPE_SECRET_KEY || '',
+    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
+    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+    platformFeePercent: 1,
   },
 };

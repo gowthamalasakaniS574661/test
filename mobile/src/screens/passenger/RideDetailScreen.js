@@ -36,8 +36,16 @@ export default function RideDetailScreen({ route, navigation }) {
   const handleBookDirectly = async () => {
     setSubmitting(true);
     try {
-      await bookingsAPI.createBooking({ rideId });
-      Alert.alert('Success', 'Ride booked!', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+      const response = await bookingsAPI.createBooking({ rideId });
+      const booking = response.data.booking;
+      Alert.alert(
+        'Booking Created',
+        'Proceed to payment to secure your booking.',
+        [
+          { text: 'Pay Now', onPress: () => navigation.navigate('Payment', { bookingId: booking.id }) },
+          { text: 'Later', style: 'cancel', onPress: () => navigation.goBack() },
+        ]
+      );
     } catch (err) {
       Alert.alert('Error', err.response?.data?.error || 'Booking failed');
     } finally {

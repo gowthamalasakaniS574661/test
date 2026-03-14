@@ -36,7 +36,7 @@ rideshare-marketplace/
 - **Bidding System** — Passengers bid on rides; drivers bid on requests. Bid acceptance auto-creates bookings
 - **Booking Management** — Direct booking or bid-based booking with seat tracking
 - **Ratings & Trust Score** — Post-ride mutual ratings update a cumulative trust score
-- **Payment Integration** — Placeholder payment processing with full lifecycle tracking
+- **Stripe Payment System** — Escrow-based payments with automatic driver payouts and 1% platform commission
 - **Search & Filtering** — Search rides by origin, destination, date, seats, and max price
 - **Google Maps Integration** — Interactive maps for pickup/destination selection, route display, and live ride tracking
 
@@ -52,6 +52,7 @@ rideshare-marketplace/
 | Maps     | Google Maps API, react-native-maps, expo-location |
 | State    | React Context + useReducer              |
 | HTTP     | Axios with interceptors                 |
+| Payments | Stripe (PaymentIntents, Connect, Webhooks) |
 | Storage  | expo-secure-store for tokens            |
 
 ## API Endpoints
@@ -115,13 +116,20 @@ rideshare-marketplace/
 | POST   | `/api/v1/ratings`               | Yes  | Submit a rating          |
 | GET    | `/api/v1/ratings/user/:userId`  | No   | Get user's ratings       |
 
-### Payments
-| Method | Endpoint                          | Auth | Description              |
-|--------|-----------------------------------|------|--------------------------|
-| POST   | `/api/v1/payments`                | Yes  | Initiate payment         |
-| GET    | `/api/v1/payments/my`             | Yes  | Get my payments          |
-| GET    | `/api/v1/payments/:id`            | Yes  | Get payment status       |
-| POST   | `/api/v1/payments/:id/complete`   | Yes  | Complete payment         |
+### Payments (Stripe)
+| Method | Endpoint                              | Auth | Description                     |
+|--------|---------------------------------------|------|---------------------------------|
+| POST   | `/api/v1/payments/create-intent`      | Yes  | Create Stripe PaymentIntent (escrow) |
+| POST   | `/api/v1/payments/confirm-escrow`     | Yes  | Confirm escrow after client auth |
+| POST   | `/api/v1/payments/:id/capture`        | Yes  | Capture escrow (driver, on completion) |
+| POST   | `/api/v1/payments/:id/refund`         | Yes  | Refund escrowed/pending payment |
+| GET    | `/api/v1/payments/my`                 | Yes  | Get my payments                 |
+| GET    | `/api/v1/payments/booking/:bookingId` | Yes  | Get payment by booking          |
+| GET    | `/api/v1/payments/:id`                | Yes  | Get payment status              |
+| POST   | `/api/v1/payments/connect/account`    | Yes  | Create Stripe Connect account   |
+| GET    | `/api/v1/payments/connect/status`     | Yes  | Get Connect account status      |
+| GET    | `/api/v1/payments/connect/dashboard`  | Yes  | Get Stripe dashboard link       |
+| POST   | `/api/v1/payments/webhook`            | No   | Stripe webhook handler          |
 
 ## Getting Started
 
@@ -130,6 +138,7 @@ rideshare-marketplace/
 - PostgreSQL 14+
 - Expo CLI (`npm install -g expo-cli`) for mobile development
 - Google Maps API key (for maps, directions, and geocoding)
+- Stripe account with API keys (for payment processing)
 
 ### Backend Setup
 
@@ -140,7 +149,7 @@ npm install
 
 # 2. Configure environment
 cp .env.example .env
-# Edit .env with your PostgreSQL credentials
+# Edit .env with your PostgreSQL credentials and Stripe API keys
 
 # 3. Create database
 createdb rideshare_marketplace
@@ -168,7 +177,10 @@ npm install
 # Edit mobile/app.json and replace YOUR_GOOGLE_MAPS_API_KEY with your key
 # Enable Maps SDK, Directions API, and Geocoding API in Google Cloud Console
 
-# 3. Start Expo
+# 3. Configure Stripe publishable key
+# Edit mobile/App.js and replace pk_test_YOUR_STRIPE_PUBLISHABLE_KEY
+
+# 4. Start Expo
 npm start
 ```
 
@@ -179,6 +191,34 @@ Scan the QR code with Expo Go (iOS/Android) to run the app.
 After running `npm run seed`:
 - **Driver:** `driver@example.com` / `password123`
 - **Passenger:** `passenger@example.com` / `password123`
+
+## Payment Flow (Stripe Escrow)
+
+```
+Passenger books ride
+       │
+       ▼
+Passenger pays ──► Stripe PaymentIntent (capture_method: manual)
+       │                    Card authorized, not charged
+       ▼
+Payment held in ESCROW ──► Funds reserved on passenger's card
+       │
+       ▼
+  Ride happens
+       │
+       ▼
+Driver completes ride ──► Stripe captures PaymentIntent
+       │                    1% platform fee deducted
+       ▼
+Driver receives 99% ──► Via Stripe Connect transfer
+```
+
+- **Pre-ride:** Passenger's card is authorized (not charged) when they book
+- **During ride:** Funds are held securely in escrow
+- **Post-ride:** Driver marks ride complete, Stripe captures funds
+- **Commission:** Platform takes 1% fee, driver receives 99%
+- **Cancellation:** If cancelled before completion, the authorization is voided (no charge)
+- **Driver onboarding:** Drivers set up Stripe Connect accounts to receive payouts
 
 ## Database Schema
 
@@ -191,7 +231,7 @@ The PostgreSQL schema includes 7 tables with full referential integrity:
 - **bids** — Bids on rides or ride requests with accept/reject workflow
 - **bookings** — Confirmed ride bookings with seat tracking
 - **ratings** — Post-ride mutual ratings that update trust scores
-- **payments** — Payment lifecycle tracking (placeholder integration)
+- **payments** — Stripe payment records with escrow, capture, refund, and commission tracking
 
 ## License
 
