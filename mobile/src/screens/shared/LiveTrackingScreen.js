@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { RouteMap, RideInfoOverlay } from '../../components/map';
+import SOSButton from '../../components/safety/SOSButton';
 import useLiveTracking from '../../hooks/useLiveTracking';
 import useRouteDirections from '../../hooks/useRouteDirections';
 import { useAuth } from '../../contexts/AuthContext';
@@ -199,10 +200,25 @@ export default function LiveTrackingScreen({ route, navigation }) {
           </TouchableOpacity>
         )}
 
+        <View style={styles.safetyRow}>
+          <TouchableOpacity
+            style={styles.shareRideBtn}
+            onPress={() => navigation.navigate('ShareRide', {
+              bookingId,
+              rideOrigin: origin?.address,
+              rideDestination: destination?.address,
+            })}
+          >
+            <Text style={styles.shareRideBtnText}>🔗 Share Ride</Text>
+          </TouchableOpacity>
+        </View>
+
         {trackingError && (
           <Text style={styles.errorText}>{trackingError}</Text>
         )}
       </View>
+
+      <SOSButton onPress={() => navigation.navigate('SOS', { bookingId })} />
     </View>
   );
 }
@@ -338,6 +354,22 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 17,
     fontWeight: '700',
+  },
+  safetyRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  shareRideBtn: {
+    flex: 1,
+    backgroundColor: '#EEF2FF',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  shareRideBtnText: {
+    color: '#4F46E5',
+    fontWeight: '700',
+    fontSize: 14,
   },
   errorText: {
     color: '#DC2626',

@@ -11,6 +11,7 @@ router.use('/bookings', require('./bookings'));
 router.use('/ratings', require('./ratings'));
 router.use('/payments', require('./payments'));
 router.use('/trust-score', require('./trustScore'));
+router.use('/safety', require('./safety'));
 router.get('/directions', authenticate, getDirections);
 
 module.exports = router;

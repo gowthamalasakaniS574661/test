@@ -66,6 +66,27 @@ export default function ProfileScreen() {
         </View>
       )}
 
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Safety</Text>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('SOS')}>
+          <Text style={styles.menuIcon}>🚨</Text>
+          <Text style={styles.menuLabel}>Emergency SOS & Contacts</Text>
+          <Text style={styles.menuArrow}>›</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('TripHistory')}>
+          <Text style={styles.menuIcon}>📋</Text>
+          <Text style={styles.menuLabel}>Trip History</Text>
+          <Text style={styles.menuArrow}>›</Text>
+        </TouchableOpacity>
+        {(user.role === 'driver' || user.role === 'both') && (
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Documents')}>
+            <Text style={styles.menuIcon}>📄</Text>
+            <Text style={styles.menuLabel}>Driver Documents</Text>
+            <Text style={styles.menuArrow}>›</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
       {(user.role === 'driver' || user.role === 'both') && (
         <TouchableOpacity
           style={styles.connectButton}
@@ -98,6 +119,10 @@ const styles = StyleSheet.create({
   infoValue: { fontSize: 14, fontWeight: '500', color: '#111827' },
   vehicleText: { fontSize: 16, fontWeight: '500', color: '#374151' },
   vehiclePlate: { fontSize: 14, color: '#6B7280', marginTop: 4 },
+  menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
+  menuIcon: { fontSize: 20, width: 32 },
+  menuLabel: { flex: 1, fontSize: 15, fontWeight: '500', color: '#374151' },
+  menuArrow: { fontSize: 20, color: '#9CA3AF' },
   connectButton: { width: '100%', marginTop: 12, backgroundColor: '#4F46E5', borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
   connectButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   logoutButton: { width: '100%', marginTop: 12, borderWidth: 2, borderColor: '#EF4444', borderRadius: 12, paddingVertical: 14, alignItems: 'center' },

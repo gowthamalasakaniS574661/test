@@ -15,6 +15,10 @@ import TrustScoreScreen from '../screens/shared/TrustScoreScreen';
 import PaymentScreen from '../screens/payment/PaymentScreen';
 import PaymentHistoryScreen from '../screens/payment/PaymentHistoryScreen';
 import StripeConnectScreen from '../screens/payment/StripeConnectScreen';
+import DocumentUploadScreen from '../screens/safety/DocumentUploadScreen';
+import SOSScreen from '../screens/safety/SOSScreen';
+import ShareRideScreen from '../screens/safety/ShareRideScreen';
+import TripHistoryScreen from '../screens/safety/TripHistoryScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -31,6 +35,8 @@ function SearchStack() {
       <Stack.Screen name="RideDetail" component={RideDetailScreen} options={{ title: 'Ride Details' }} />
       <Stack.Screen name="Payment" component={PaymentScreen} options={{ title: 'Payment' }} />
       <Stack.Screen name="LiveTracking" component={LiveTrackingScreen} options={{ title: 'Live Tracking', headerTransparent: true, headerTintColor: '#111827' }} />
+      <Stack.Screen name="SOS" component={SOSScreen} options={{ title: 'Emergency SOS', headerStyle: { backgroundColor: '#FEE2E2' } }} />
+      <Stack.Screen name="ShareRide" component={ShareRideScreen} options={{ title: 'Share Ride' }} />
     </Stack.Navigator>
   );
 }
@@ -42,6 +48,8 @@ function BookingsStack() {
       <Stack.Screen name="RideDetail" component={RideDetailScreen} options={{ title: 'Ride Details' }} />
       <Stack.Screen name="Payment" component={PaymentScreen} options={{ title: 'Payment' }} />
       <Stack.Screen name="LiveTracking" component={LiveTrackingScreen} options={{ title: 'Live Tracking', headerTransparent: true, headerTintColor: '#111827' }} />
+      <Stack.Screen name="SOS" component={SOSScreen} options={{ title: 'Emergency SOS', headerStyle: { backgroundColor: '#FEE2E2' } }} />
+      <Stack.Screen name="ShareRide" component={ShareRideScreen} options={{ title: 'Share Ride' }} />
     </Stack.Navigator>
   );
 }
@@ -54,6 +62,8 @@ function DriverStack() {
       <Stack.Screen name="RideDetail" component={RideDetailScreen} options={{ title: 'Ride Details' }} />
       <Stack.Screen name="Payment" component={PaymentScreen} options={{ title: 'Payment' }} />
       <Stack.Screen name="LiveTracking" component={LiveTrackingScreen} options={{ title: 'Live Tracking', headerTransparent: true, headerTintColor: '#111827' }} />
+      <Stack.Screen name="SOS" component={SOSScreen} options={{ title: 'Emergency SOS', headerStyle: { backgroundColor: '#FEE2E2' } }} />
+      <Stack.Screen name="ShareRide" component={ShareRideScreen} options={{ title: 'Share Ride' }} />
     </Stack.Navigator>
   );
 }
@@ -73,6 +83,10 @@ function ProfileStack() {
     <Stack.Navigator>
       <Stack.Screen name="ProfileMain" component={ProfileScreen} options={{ title: 'Profile' }} />
       <Stack.Screen name="TrustScore" component={TrustScoreScreen} options={{ title: 'Trust Score' }} />
+      <Stack.Screen name="Documents" component={DocumentUploadScreen} options={{ title: 'Documents' }} />
+      <Stack.Screen name="TripHistory" component={TripHistoryScreen} options={{ title: 'Trip History' }} />
+      <Stack.Screen name="SOS" component={SOSScreen} options={{ title: 'Emergency SOS', headerStyle: { backgroundColor: '#FEE2E2' } }} />
+      <Stack.Screen name="RideDetail" component={RideDetailScreen} options={{ title: 'Ride Details' }} />
     </Stack.Navigator>
   );
 }
