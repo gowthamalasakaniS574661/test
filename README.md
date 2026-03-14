@@ -17,9 +17,14 @@ rideshare-marketplace/
 ├── mobile/                   # React Native (Expo) app
 │   └── src/
 │       ├── api/              # API client & service modules
+│       ├── components/map/   # Map components (RouteMap, LocationPicker, RideInfoOverlay)
+│       ├── config/           # App configuration (maps API keys)
 │       ├── contexts/         # React contexts (auth state)
+│       ├── hooks/            # Custom hooks (useRouteDirections, useLiveTracking)
 │       ├── navigation/       # Stack & tab navigators
-│       └── screens/          # UI screens (auth, driver, passenger)
+│       ├── screens/          # UI screens (auth, driver, passenger, shared)
+│       ├── services/         # Background services (location tracking)
+│       └── utils/            # Utility functions (location, distance)
 └── shared/                   # Shared constants & types
 ```
 
@@ -33,6 +38,7 @@ rideshare-marketplace/
 - **Ratings & Trust Score** — Post-ride mutual ratings update a cumulative trust score
 - **Payment Integration** — Placeholder payment processing with full lifecycle tracking
 - **Search & Filtering** — Search rides by origin, destination, date, seats, and max price
+- **Google Maps Integration** — Interactive maps for pickup/destination selection, route display, and live ride tracking
 
 ## Tech Stack
 
@@ -43,6 +49,7 @@ rideshare-marketplace/
 | Validation | express-validator                     |
 | Security | helmet, cors, express-rate-limit        |
 | Mobile   | React Native (Expo), React Navigation   |
+| Maps     | Google Maps API, react-native-maps, expo-location |
 | State    | React Context + useReducer              |
 | HTTP     | Axios with interceptors                 |
 | Storage  | expo-secure-store for tokens            |
@@ -93,6 +100,14 @@ rideshare-marketplace/
 | GET    | `/api/v1/bookings/:id`            | Yes  | Get booking details      |
 | POST   | `/api/v1/bookings/:id/cancel`     | Yes  | Cancel booking           |
 | POST   | `/api/v1/bookings/:id/complete`   | Yes  | Mark booking complete    |
+| POST   | `/api/v1/bookings/:id/location`   | Yes  | Update driver location   |
+| GET    | `/api/v1/bookings/:id/location`   | Yes  | Get driver location      |
+| POST   | `/api/v1/bookings/:id/start`      | Yes  | Start ride (driver only) |
+
+### Directions
+| Method | Endpoint                          | Auth | Description              |
+|--------|-----------------------------------|------|--------------------------|
+| GET    | `/api/v1/directions`              | Yes  | Get route directions     |
 
 ### Ratings
 | Method | Endpoint                        | Auth | Description              |
@@ -114,6 +129,7 @@ rideshare-marketplace/
 - Node.js 18+
 - PostgreSQL 14+
 - Expo CLI (`npm install -g expo-cli`) for mobile development
+- Google Maps API key (for maps, directions, and geocoding)
 
 ### Backend Setup
 
@@ -148,7 +164,11 @@ The API server starts at `http://localhost:3000`. Health check: `GET /health`.
 cd mobile
 npm install
 
-# 2. Start Expo
+# 2. Configure Google Maps API key
+# Edit mobile/app.json and replace YOUR_GOOGLE_MAPS_API_KEY with your key
+# Enable Maps SDK, Directions API, and Geocoding API in Google Cloud Console
+
+# 3. Start Expo
 npm start
 ```
 
